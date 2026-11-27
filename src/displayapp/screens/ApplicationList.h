@@ -38,7 +38,7 @@ namespace Pinetime {
         Pinetime::Controllers::FS& filesystem;
         std::array<Tile::Applications, UserAppTypes::Count> apps;
 
-        static constexpr int appsPerScreen = 6;
+        static constexpr int appsPerScreen = Tile::appsPerScreen;
 
         static constexpr int nScreens = UserAppTypes::Count > 0 ? (UserAppTypes::Count - 1) / appsPerScreen + 1 : 1;
 

@@ -10,6 +10,31 @@ namespace {
     auto* screen = static_cast<List*>(obj->user_data);
     screen->OnButtonEvent(obj, event);
   }
+
+  lv_color_t IconColor(Pinetime::Applications::Apps app) {
+    using Pinetime::Applications::Apps;
+    switch (app) {
+      case Apps::SettingDisplay:
+      case Apps::SettingBluetooth:
+        return Colors::blue;
+      case Apps::SettingWakeUp:
+      case Apps::SettingSteps:
+        return Colors::green;
+      case Apps::SettingWatchFace:
+        return Colors::indigo;
+      case Apps::SettingHeartRate:
+      case Apps::SettingChimes:
+        return Colors::red;
+      case Apps::SettingWeatherFormat:
+        return Colors::cyan;
+      case Apps::SettingShakeThreshold:
+        return Colors::orange;
+      case Apps::BatteryInfo:
+        return Colors::green;
+      default:
+        return Colors::gray;
+    }
+  }
 }
 
 List::List(uint8_t screenID,
@@ -53,17 +78,20 @@ List::List(uint8_t screenID,
       itemApps[i]->user_data = this;
       lv_obj_set_style_local_clip_corner(itemApps[i], LV_BTN_PART_MAIN, LV_STATE_DEFAULT, true);
 
-      lv_obj_t* icon = lv_label_create(itemApps[i], nullptr);
-      lv_obj_set_style_local_text_color(icon, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_YELLOW);
-      lv_label_set_text_static(icon, applications[i].icon);
-      lv_label_set_long_mode(icon, LV_LABEL_LONG_CROP);
-      lv_label_set_align(icon, LV_LABEL_ALIGN_CENTER);
-      lv_obj_set_width(icon, btnHeight);
-      lv_obj_align(icon, nullptr, LV_ALIGN_IN_LEFT_MID, 0, 0);
+      static constexpr lv_coord_t iconSize = 34;
+      lv_obj_t* icon = lv_obj_create(itemApps[i], nullptr);
+      lv_obj_set_size(icon, iconSize, iconSize);
+      lv_obj_set_style_local_radius(icon, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_RADIUS_CIRCLE);
+      lv_obj_set_style_local_bg_color(icon, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, IconColor(applications[i].application));
+      lv_obj_set_click(icon, false);
+      lv_obj_align(icon, nullptr, LV_ALIGN_IN_LEFT_MID, 10, 0);
+      lv_obj_t* glyph = lv_label_create(icon, nullptr);
+      lv_label_set_text_static(glyph, applications[i].icon);
+      lv_obj_align(glyph, nullptr, LV_ALIGN_CENTER, 0, 0);
 
       lv_obj_t* text = lv_label_create(itemApps[i], nullptr);
       lv_label_set_text_fmt(text, "%s", applications[i].name);
-      lv_obj_align(text, icon, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+      lv_obj_align(text, icon, LV_ALIGN_OUT_RIGHT_MID, 10, 0);
     }
   }
 }

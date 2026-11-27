@@ -1,20 +1,54 @@
 #include "displayapp/screens/Tile.h"
-#include "displayapp/screens/BatteryIcon.h"
-#include "components/ble/BleController.h"
+#include "displayapp/DisplayApp.h"
 #include "displayapp/InfiniTimeTheme.h"
 
 using namespace Pinetime::Applications::Screens;
 
 namespace {
-  void event_handler(lv_obj_t* obj, lv_event_t event) {
-    if (event != LV_EVENT_VALUE_CHANGED) {
-      return;
-    }
+  constexpr lv_coord_t iconSize = 52;
+  constexpr lv_coord_t gap = 6;
+  // Vertical distance between honeycomb rows: (iconSize + gap) * sin(60)
+  constexpr lv_coord_t rowPitch = 50;
+  constexpr lv_coord_t gridTop = 30;
 
-    Tile* screen = static_cast<Tile*>(obj->user_data);
-    auto* eventDataPtr = (uint32_t*) lv_event_get_data();
-    uint32_t eventData = *eventDataPtr;
-    screen->OnValueChangedEvent(obj, eventData);
+  void event_handler(lv_obj_t* obj, lv_event_t event) {
+    if (event == LV_EVENT_CLICKED) {
+      static_cast<Tile*>(obj->user_data)->OnClick(obj);
+    }
+  }
+
+  lv_color_t AppColor(Pinetime::Applications::Apps app) {
+    using Pinetime::Applications::Apps;
+    switch (app) {
+      case Apps::StopWatch:
+      case Apps::Alarm:
+      case Apps::Timer:
+        return Colors::orange;
+      case Apps::Steps:
+        return Colors::green;
+      case Apps::HeartRate:
+        return Colors::red;
+      case Apps::Music:
+        return Colors::pink;
+      case Apps::Paint:
+        return Colors::purple;
+      case Apps::Paddle:
+        return Colors::indigo;
+      case Apps::Twos:
+        return Colors::yellow;
+      case Apps::Dice:
+        return Colors::teal;
+      case Apps::Metronome:
+        return Colors::brown;
+      case Apps::Navigation:
+        return Colors::blue;
+      case Apps::Weather:
+        return Colors::cyan;
+      case Apps::Motion:
+        return Colors::mint;
+      default:
+        return Colors::gray;
+    }
   }
 }
 
@@ -22,64 +56,54 @@ Tile::Tile(uint8_t screenID,
            uint8_t numScreens,
            DisplayApp* app,
            Controllers::Settings& settingsController,
-           const Controllers::Battery& batteryController,
-           const Controllers::Ble& bleController,
-           const Controllers::AlarmController& alarmController,
            Controllers::DateTime& dateTimeController,
-           std::array<Applications, 6>& applications)
-  : app {app},
-    dateTimeController {dateTimeController},
-    pageIndicator(screenID, numScreens),
-    statusIcons(batteryController, bleController, alarmController) {
+           std::array<Applications, appsPerScreen>& applications)
+  : app {app}, dateTimeController {dateTimeController}, pageIndicator(screenID, numScreens) {
 
   settingsController.SetAppMenu(screenID);
 
-  statusIcons.Create();
-  lv_obj_align(statusIcons.GetObject(), lv_scr_act(), LV_ALIGN_IN_TOP_RIGHT, -8, 0);
+  labelTime = lv_label_create(lv_scr_act(), nullptr);
+  lv_obj_align(labelTime, nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 2);
 
-  // Time
-  label_time = lv_label_create(lv_scr_act(), nullptr);
-  lv_label_set_align(label_time, LV_LABEL_ALIGN_CENTER);
-  lv_obj_align(label_time, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 0);
-
-  pageIndicator.Create();
-
-  uint8_t btIndex = 0;
-  for (uint8_t i = 0; i < 6; i++) {
-    if (i == 3) {
-      btnmMap[btIndex++] = "\n";
-    }
-    if (applications[i].application == Apps::None) {
-      btnmMap[btIndex] = " ";
-    } else {
-      btnmMap[btIndex] = applications[i].icon;
-    }
-    btIndex++;
-    apps[i] = applications[i].application;
-  }
-  btnmMap[btIndex] = "";
-
-  btnm1 = lv_btnmatrix_create(lv_scr_act(), nullptr);
-  lv_btnmatrix_set_map(btnm1, btnmMap);
-  lv_obj_set_size(btnm1, LV_HOR_RES - 16, LV_VER_RES - 60);
-  lv_obj_align(btnm1, nullptr, LV_ALIGN_CENTER, 0, 10);
-
-  lv_obj_set_style_local_radius(btnm1, LV_BTNMATRIX_PART_BTN, LV_STATE_DEFAULT, 20);
-  lv_obj_set_style_local_bg_color(btnm1, LV_BTNMATRIX_PART_BTN, LV_STATE_DEFAULT, Colors::bgAlt);
-  lv_obj_set_style_local_bg_opa(btnm1, LV_BTNMATRIX_PART_BTN, LV_STATE_DISABLED, LV_OPA_50);
-  lv_obj_set_style_local_bg_color(btnm1, LV_BTNMATRIX_PART_BTN, LV_STATE_DISABLED, Colors::bgDark);
-  lv_obj_set_style_local_pad_all(btnm1, LV_BTNMATRIX_PART_BG, LV_STATE_DEFAULT, 0);
-  lv_obj_set_style_local_pad_inner(btnm1, LV_BTNMATRIX_PART_BG, LV_STATE_DEFAULT, 10);
-
-  for (uint8_t i = 0; i < 6; i++) {
-    lv_btnmatrix_set_btn_ctrl(btnm1, i, LV_BTNMATRIX_CTRL_CLICK_TRIG);
-    if (applications[i].application == Apps::None || !applications[i].enabled) {
-      lv_btnmatrix_set_btn_ctrl(btnm1, i, LV_BTNMATRIX_CTRL_DISABLED);
-    }
+  if (numScreens > 1) {
+    pageIndicator.Create();
   }
 
-  btnm1->user_data = this;
-  lv_obj_set_event_cb(btnm1, event_handler);
+  uint8_t index = 0;
+  for (uint8_t row = 0; row < rowSizes.size(); row++) {
+    const uint8_t count = rowSizes[row];
+    const lv_coord_t rowWidth = count * iconSize + (count - 1) * gap;
+    const lv_coord_t x0 = (LV_HOR_RES - rowWidth) / 2;
+    const lv_coord_t y = gridTop + row * rowPitch;
+
+    for (uint8_t col = 0; col < count; col++, index++) {
+      apps[index] = applications[index].application;
+      if (apps[index] == Apps::None) {
+        continue;
+      }
+
+      lv_obj_t* button = lv_btn_create(lv_scr_act(), nullptr);
+      lv_obj_set_size(button, iconSize, iconSize);
+      lv_obj_set_pos(button, x0 + col * (iconSize + gap), y);
+      lv_obj_set_style_local_bg_color(button, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, AppColor(apps[index]));
+      lv_obj_set_style_local_transform_width(button, LV_BTN_PART_MAIN, LV_STATE_PRESSED, -4);
+      lv_obj_set_style_local_transform_height(button, LV_BTN_PART_MAIN, LV_STATE_PRESSED, -4);
+      lv_obj_set_style_local_pad_all(button, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, 0);
+
+      lv_obj_t* icon = lv_label_create(button, nullptr);
+      lv_label_set_text_static(icon, applications[index].icon);
+
+      if (!applications[index].enabled) {
+        lv_obj_set_style_local_bg_opa(button, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_30);
+        lv_obj_set_style_local_text_opa(button, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, LV_OPA_50);
+        lv_obj_set_click(button, false);
+      }
+
+      button->user_data = this;
+      lv_obj_set_event_cb(button, event_handler);
+      buttons[index] = button;
+    }
+  }
 
   Refresh();
   taskRefresh = lv_task_create(RefreshTaskCallback, LV_DISP_DEF_REFR_PERIOD, LV_TASK_PRIO_MID, this);
@@ -91,18 +115,19 @@ Tile::~Tile() {
 }
 
 void Tile::Refresh() {
-  statusIcons.Update();
   currentDateTime = std::chrono::time_point_cast<std::chrono::minutes>(dateTimeController.CurrentDateTime());
   if (currentDateTime.IsUpdated()) {
-    lv_label_set_text(label_time, dateTimeController.FormattedTime().c_str());
+    lv_label_set_text(labelTime, dateTimeController.FormattedTime().c_str());
+    lv_obj_align(labelTime, nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 2);
   }
 }
 
-void Tile::OnValueChangedEvent(lv_obj_t* obj, uint32_t buttonId) {
-  if (obj != btnm1) {
-    return;
+void Tile::OnClick(lv_obj_t* obj) {
+  for (uint8_t i = 0; i < appsPerScreen; i++) {
+    if (buttons[i] == obj) {
+      app->StartApp(apps[i], DisplayApp::FullRefreshDirections::Up);
+      running = false;
+      return;
+    }
   }
-
-  app->StartApp(apps[buttonId], DisplayApp::FullRefreshDirections::Up);
-  running = false;
 }

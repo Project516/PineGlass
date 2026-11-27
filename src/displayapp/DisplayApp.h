@@ -74,6 +74,7 @@ namespace Pinetime {
       void PushMessage(Display::Messages msg);
 
       void StartApp(Apps app, DisplayApp::FullRefreshDirections direction);
+      bool IsAppAvailable(Apps app) const;
 
       void SetFullRefresh(FullRefreshDirections direction);
 
@@ -128,6 +129,7 @@ namespace Pinetime {
       void Refresh();
       void LoadNewScreen(Apps app, DisplayApp::FullRefreshDirections direction);
       void LoadScreen(Apps app, DisplayApp::FullRefreshDirections direction);
+      void SwitchWatchFace(int step);
       void PushMessageToSystemTask(Pinetime::System::Messages message);
 
       Apps nextApp = Apps::None;

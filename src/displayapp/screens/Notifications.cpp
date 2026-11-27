@@ -8,7 +8,37 @@
 
 using namespace Pinetime::Applications::Screens;
 extern lv_font_t jetbrains_mono_extrabold_compressed;
-extern lv_font_t jetbrains_mono_bold_20;
+extern lv_font_t inter_semibold_20;
+
+namespace {
+  struct CategoryStyle {
+    const char* icon;
+    lv_color_t color;
+  };
+
+  CategoryStyle StyleFor(Pinetime::Controllers::NotificationManager::Categories category) {
+    using Category = Pinetime::Controllers::NotificationManager::Categories;
+    switch (category) {
+      case Category::Sms:
+      case Category::InstantMessage:
+        return {Symbols::comment, Colors::green};
+      case Category::Email:
+        return {Symbols::envelope, Colors::blue};
+      case Category::IncomingCall:
+      case Category::MissedCall:
+      case Category::VoiceMail:
+        return {Symbols::phone, Colors::green};
+      case Category::Schedule:
+        return {Symbols::calendar, Colors::red};
+      case Category::News:
+        return {Symbols::newspaper, Colors::pink};
+      case Category::HighProriotyAlert:
+        return {Symbols::exclamation, Colors::red};
+      default:
+        return {Symbols::bell, Colors::gray};
+    }
+  }
+}
 
 Notifications::Notifications(DisplayApp* app,
                              Pinetime::Controllers::NotificationManager& notificationManager,
@@ -50,7 +80,7 @@ Notifications::Notifications(DisplayApp* app,
     timeoutLine = lv_line_create(lv_scr_act(), nullptr);
 
     lv_obj_set_style_local_line_width(timeoutLine, LV_LINE_PART_MAIN, LV_STATE_DEFAULT, 3);
-    lv_obj_set_style_local_line_color(timeoutLine, LV_LINE_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+    lv_obj_set_style_local_line_color(timeoutLine, LV_LINE_PART_MAIN, LV_STATE_DEFAULT, Colors::secondaryLabel);
     lv_obj_set_style_local_line_rounded(timeoutLine, LV_LINE_PART_MAIN, LV_STATE_DEFAULT, true);
 
     lv_line_set_points(timeoutLine, timeoutLinePoints, 2);
@@ -262,30 +292,42 @@ Notifications::NotificationItem::NotificationItem(const char* title,
                                                   Pinetime::Controllers::AlertNotificationService& alertNotificationService,
                                                   Pinetime::Controllers::MotorController& motorController)
   : alertNotificationService {alertNotificationService}, motorController {motorController} {
+  using Category = Controllers::NotificationManager::Categories;
+
   container = lv_cont_create(lv_scr_act(), nullptr);
   lv_obj_set_size(container, LV_HOR_RES, LV_VER_RES);
   lv_obj_set_style_local_bg_color(container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+  lv_obj_set_style_local_radius(container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
   lv_obj_set_style_local_pad_all(container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
   lv_obj_set_style_local_pad_inner(container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
   lv_obj_set_style_local_border_width(container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
 
-  subject_container = lv_cont_create(container, nullptr);
-  lv_obj_set_style_local_bg_color(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, Colors::bgAlt);
-  lv_obj_set_style_local_pad_all(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 10);
-  lv_obj_set_style_local_pad_inner(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 5);
-  lv_obj_set_style_local_border_width(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
+  if (notifNb == 0) {
+    lv_obj_t* empty = lv_label_create(container, nullptr);
+    lv_obj_set_style_local_text_color(empty, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::secondaryLabel);
+    lv_label_set_text_static(empty, "No Notifications");
+    lv_obj_align(empty, nullptr, LV_ALIGN_CENTER, 0, 0);
+    subject_container = nullptr;
+    return;
+  }
 
-  lv_obj_set_pos(subject_container, 0, 50);
-  lv_obj_set_size(subject_container, LV_HOR_RES, LV_VER_RES - 50);
-  lv_cont_set_layout(subject_container, LV_LAYOUT_COLUMN_LEFT);
-  lv_cont_set_fit(subject_container, LV_FIT_NONE);
+  const CategoryStyle style = StyleFor(category);
+
+  lv_obj_t* appIcon = lv_obj_create(container, nullptr);
+  lv_obj_set_size(appIcon, 30, 30);
+  lv_obj_set_pos(appIcon, 10, 10);
+  lv_obj_set_style_local_radius(appIcon, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_RADIUS_CIRCLE);
+  lv_obj_set_style_local_bg_color(appIcon, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, style.color);
+  lv_obj_t* appGlyph = lv_label_create(appIcon, nullptr);
+  lv_label_set_text_static(appGlyph, style.icon);
+  lv_obj_align(appGlyph, nullptr, LV_ALIGN_CENTER, 0, 0);
 
   lv_obj_t* alert_count = lv_label_create(container, nullptr);
+  lv_obj_set_style_local_text_color(alert_count, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::secondaryLabel);
   lv_label_set_text_fmt(alert_count, "%i/%i", notifNr, notifNb);
-  lv_obj_align(alert_count, nullptr, LV_ALIGN_IN_TOP_RIGHT, 0, 16);
+  lv_obj_align(alert_count, nullptr, LV_ALIGN_IN_TOP_RIGHT, -10, 14);
 
   lv_obj_t* alert_type = lv_label_create(container, nullptr);
-  lv_obj_set_style_local_text_color(alert_type, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::orange);
   if (title == nullptr) {
     lv_label_set_text_static(alert_type, "Notification");
   } else {
@@ -299,53 +341,54 @@ Notifications::NotificationItem::NotificationItem(const char* title,
     lv_label_refr_text(alert_type);
   }
   lv_label_set_long_mode(alert_type, LV_LABEL_LONG_SROLL_CIRC);
-  lv_obj_set_width(alert_type, 180);
-  lv_obj_align(alert_type, nullptr, LV_ALIGN_IN_TOP_LEFT, 0, 16);
+  lv_obj_set_width(alert_type, 140);
+  lv_obj_set_pos(alert_type, 48, 14);
+
+  subject_container = lv_cont_create(container, nullptr);
+  lv_obj_set_style_local_bg_color(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, Colors::platter);
+  lv_obj_set_style_local_radius(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 20);
+  lv_obj_set_style_local_pad_all(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 14);
+  lv_obj_set_style_local_pad_inner(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 4);
+  lv_obj_set_style_local_border_width(subject_container, LV_CONT_PART_MAIN, LV_STATE_DEFAULT, 0);
+  lv_obj_set_pos(subject_container, 4, 50);
+  lv_obj_set_size(subject_container, LV_HOR_RES - 8, LV_VER_RES - 54);
+  lv_cont_set_layout(subject_container, LV_LAYOUT_COLUMN_LEFT);
+  lv_cont_set_fit(subject_container, LV_FIT_NONE);
 
   lv_obj_t* alert_subject = lv_label_create(subject_container, nullptr);
   lv_label_set_long_mode(alert_subject, LV_LABEL_LONG_BREAK);
-  lv_obj_set_width(alert_subject, LV_HOR_RES - 20);
+  lv_obj_set_width(alert_subject, LV_HOR_RES - 36);
 
   switch (category) {
     default:
       lv_label_set_text(alert_subject, msg);
       break;
-    case Controllers::NotificationManager::Categories::IncomingCall: {
-      lv_obj_set_height(subject_container, 108);
-      lv_label_set_text_static(alert_subject, "Incoming call from");
+    case Category::IncomingCall: {
+      lv_obj_set_height(subject_container, 96);
+      lv_obj_set_style_local_text_color(alert_subject, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::secondaryLabel);
+      lv_label_set_text_static(alert_subject, "Incoming call");
 
       lv_obj_t* alert_caller = lv_label_create(subject_container, nullptr);
-      lv_obj_align(alert_caller, alert_subject, LV_ALIGN_OUT_BOTTOM_LEFT, 0, 0);
       lv_label_set_long_mode(alert_caller, LV_LABEL_LONG_BREAK);
-      lv_obj_set_width(alert_caller, LV_HOR_RES - 20);
+      lv_obj_set_width(alert_caller, LV_HOR_RES - 36);
       lv_label_set_text(alert_caller, msg);
 
-      bt_accept = lv_btn_create(container, nullptr);
-      bt_accept->user_data = this;
-      lv_obj_set_event_cb(bt_accept, CallEventHandler);
-      lv_obj_set_size(bt_accept, 76, 76);
-      lv_obj_align(bt_accept, nullptr, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
-      label_accept = lv_label_create(bt_accept, nullptr);
-      lv_label_set_text_static(label_accept, Symbols::phone);
-      lv_obj_set_style_local_bg_color(bt_accept, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::highlight);
-
-      bt_reject = lv_btn_create(container, nullptr);
-      bt_reject->user_data = this;
-      lv_obj_set_event_cb(bt_reject, CallEventHandler);
-      lv_obj_set_size(bt_reject, 76, 76);
-      lv_obj_align(bt_reject, nullptr, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-      label_reject = lv_label_create(bt_reject, nullptr);
-      lv_label_set_text_static(label_reject, Symbols::phoneSlash);
-      lv_obj_set_style_local_bg_color(bt_reject, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-
-      bt_mute = lv_btn_create(container, nullptr);
-      bt_mute->user_data = this;
-      lv_obj_set_event_cb(bt_mute, CallEventHandler);
-      lv_obj_set_size(bt_mute, 76, 76);
-      lv_obj_align(bt_mute, nullptr, LV_ALIGN_IN_BOTTOM_RIGHT, 0, 0);
-      label_mute = lv_label_create(bt_mute, nullptr);
-      lv_label_set_text_static(label_mute, Symbols::volumMute);
-      lv_obj_set_style_local_bg_color(bt_mute, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, Colors::lightGray);
+      auto callButton = [this, container = container](lv_obj_t*& label, const char* icon, lv_color_t color, lv_align_t align) {
+        lv_obj_t* button = lv_btn_create(container, nullptr);
+        button->user_data = this;
+        lv_obj_set_event_cb(button, CallEventHandler);
+        lv_obj_set_size(button, 68, 68);
+        lv_obj_align(button, nullptr, align, 0, -8);
+        lv_obj_set_style_local_bg_color(button, LV_BTN_PART_MAIN, LV_STATE_DEFAULT, color);
+        label = lv_label_create(button, nullptr);
+        lv_label_set_text_static(label, icon);
+        return button;
+      };
+      bt_reject = callButton(label_reject, Symbols::phoneSlash, Colors::red, LV_ALIGN_IN_BOTTOM_LEFT);
+      lv_obj_set_x(bt_reject, 10);
+      bt_mute = callButton(label_mute, Symbols::volumMute, Colors::button, LV_ALIGN_IN_BOTTOM_MID);
+      bt_accept = callButton(label_accept, Symbols::phone, Colors::green, LV_ALIGN_IN_BOTTOM_RIGHT);
+      lv_obj_set_x(bt_accept, LV_HOR_RES - 78);
     } break;
   }
 }
