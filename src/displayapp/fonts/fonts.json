@@ -82,5 +82,19 @@
       ],
       "bpp": 2,
       "size": 25
+   },
+   "app_icons_28": {
+      "sources": [
+         {
+            "file": "Inter-SemiBold.ttf",
+            "range": "0x32, 0x4d"
+         },
+         {
+            "file": "FontAwesome5-Solid+Brands+Regular.woff",
+            "range": "0xf001, 0xf0f3, 0xf1ec, 0xf1fc, 0xf21e, 0xf252, 0xf2f2, 0xf45d, 0xf522, 0xf54b, 0xf569, 0xf5a0, 0xf743"
+         }
+      ],
+      "bpp": 4,
+      "size": 28
    }
 }
