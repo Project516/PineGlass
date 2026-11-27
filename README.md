@@ -1,111 +1,62 @@
-<div align="center">
+# PineGlass
 
-![Header Image](doc/logo/watchface_collage.png)
+PineGlass is firmware for the [PineTime](https://pine64.org/devices/pinetime/) smartwatch with an interface inspired by watchOS. It is a fork of [InfiniTime](https://github.com/InfiniTimeOrg/InfiniTime) and keeps all of its apps, Bluetooth features, and companion app support.
 
-<br>
+<p>
+<img src="doc/pineglass/face.png" width="240" alt="Modular watch face">
+<img src="doc/pineglass/grid.png" width="240" alt="Honeycomb app grid">
+<img src="doc/pineglass/control.png" width="240" alt="Control Center">
+<img src="doc/pineglass/notification.png" width="240" alt="Notification card">
+<img src="doc/pineglass/settings.png" width="240" alt="Settings list">
+</p>
 
-[![GitHub tag](https://img.shields.io/github/tag/InfiniTimeOrg/InfiniTime?include_prereleases=&sort=semver&color=blue)](https://github.com/InfiniTimeOrg/InfiniTime/releases)
-[![GitHub License](https://img.shields.io/github/license/InfiniTimeOrg/InfiniTime)](https://github.com/InfiniTimeOrg/InfiniLink/blob/main/LICENSE)
-[![Issues - InfiniTime](https://img.shields.io/github/issues/InfiniTimeOrg/InfiniTime)](https://github.com/InfiniTimeOrg/InfiniTime/issues)
-[![Pull Requests - InfiniTime](https://img.shields.io/github/issues-pr/InfiniTimeOrg/InfiniTime)](https://github.com/InfiniTimeOrg/InfiniTime/pulls)
-[![Downloads - InfiniTime](https://img.shields.io/github/downloads/InfiniTimeOrg/InfiniTime/total)](https://github.com/InfiniTimeOrg/InfiniTime)
-[![Stars - InfiniTime](https://img.shields.io/github/stars/InfiniTimeOrg/InfiniTime?style=social)](https://github.com/InfiniTimeOrg/InfiniTime/stargazers)
-[![Forks - InfiniTime](https://img.shields.io/github/forks/InfiniTimeOrg/InfiniTime?style=social)](https://github.com/InfiniTimeOrg/InfiniTime/network/members)
+## What is different from InfiniTime
 
-# InfiniTime
+- **Modular watch face.** Date and time at the top, a large weather module, and round complications for steps, heart rate and battery. Tap a complication to open its app. Modular is the default face, and every InfiniTime face is still available.
+- **Honeycomb app grid.** Apps are colored circles in staggered rows.
+- **Control Center.** Two columns of pill buttons: Bluetooth, battery, Do Not Disturb, Sleep, flashlight, brightness, Settings, and Lock Screen.
+- **Notification cards.** Each card shows an app icon in the category color, the sender, and the message on a rounded card.
+- **System look.** Black background, a dark color palette, rounded controls, and the Inter typeface with antialiased text.
 
-*Fast open-source firmware for the [PineTime smartwatch](https://pine64.org/devices/pinetime/) with many features, written in modern C++.*
+## Gestures
 
-<br>
+| On the watch face | Action |
+|---|---|
+| Press the button | Open Control Center |
+| Swipe up | Open the app grid |
+| Swipe down | Open notifications |
+| Swipe left or right | Change the watch face |
+| Double tap | Turn the screen off |
 
-</div>
+Inside an app, press the button to go back. Hold the button to return to the watch face.
 
-## New to InfiniTime?
+## Install
 
-- [Getting started with InfiniTime](doc/gettingStarted/gettingStarted-1.0.md)
-- [Updating the software](doc/gettingStarted/updating-software.md)
-- [About the firmware and bootloader](doc/gettingStarted/about-software.md)
-- [Available apps](doc/gettingStarted/Applications.md)
-- [Available watch faces](/doc/gettingStarted/Watchfaces.md)
-- [PineTimeStyle Watch face](https://pine64.org/documentation/PineTime/Watchfaces/PineTimeStyle)
-  - [Weather integration](https://pine64.org/documentation/PineTime/Software/InfiniTime_weather/)
+1. Download `pinetime-mcuboot-app-dfu-*.zip` from the [releases](https://github.com/Project516/PineGlass/releases).
+2. Flash it with a companion app: [InfiniLink](https://github.com/InfiniTimeOrg/InfiniLink) on iOS, [Gadgetbridge](https://gadgetbridge.org/) on Android, or [ITD](https://gitea.elara.ws/Elara6331/itd) or [Siglo](https://github.com/alexr4535/siglo) on Linux.
+3. After the watch restarts, open Settings > Firmware and tap Validate. If you do not validate it, the watch goes back to the previous firmware on the next restart.
 
-### Companion apps
+The watch keeps the Bluetooth name "InfiniTime", so companion apps find it the same way as before. To go back to InfiniTime, flash an [InfiniTime release](https://github.com/InfiniTimeOrg/InfiniTime/releases) the same way.
 
-- [Gadgetbridge](https://gadgetbridge.org/) (Android)
-- [Amazfish](https://github.com/piggz/harbour-amazfish/) ([SailfishOS](https://sailfishos-chum.github.io/apps/harbour-amazfish/), [Ubuntu Touch](https://open-store.io/app/uk.co.piggz.amazfish), [Flatpak](https://flathub.org/apps/uk.co.piggz.amazfish))
-- [Siglo](https://github.com/alexr4535/siglo) (Linux)
-- [InfiniLink](https://github.com/InfiniTimeOrg/InfiniLink) (iOS)
-- [ITD](https://gitea.elara.ws/Elara6331/itd) (Linux)
-- [WatchMate](https://github.com/azymohliad/watchmate) (Linux)
-- [InfiniTimeExplorer](https://infinitimeexplorer.netlify.app) (Web)
+## Build
 
-<br>
+PineGlass builds the same way as InfiniTime. With Docker or Podman:
 
-> *InfiniTimeExplorer is only compatible with web browsers that support Web BLE. Current fully supported browsers include Chrome and Microsoft Edge.* 
->
-> *We removed mentions to NRFConnect as this app is closed source and recent versions do not work anymore with InfiniTime (the last version known to work is 4.24.3). If you used NRFConnect in the past, we recommend you switch to [Gadgetbridge](https://gadgetbridge.org/).* 
+```sh
+git clone https://github.com/Project516/PineGlass.git
+cd PineGlass
+git submodule update --init
+docker run --rm -it -v ${PWD}:/sources --user $(id -u):$(id -g) infinitime/infinitime-build
+```
 
-## Development
+The firmware files are written to `build/output`. See the [InfiniTime build docs](doc/buildAndProgram.md) for other ways to build, and [InfiniSim](https://github.com/InfiniTimeOrg/InfiniSim) to run the interface on a computer.
 
-- [InfiniTime Vision](doc/InfiniTimeVision.md)
-- [Rough structure of the code](doc/code/Intro.md)
-- [How to implement an application](doc/code/Apps.md)
-- [Generate the fonts and symbols](src/displayapp/fonts/README.md)
-- [Tips on designing an app UI](doc/ui_guidelines.md)
-- [Bootloader, OTA and DFU](bootloader/README.md)
-- [External resources](doc/ExternalResources.md)
+## Credits and licenses
 
-### Contributing
+PineGlass is based on InfiniTime by the InfiniTime contributors and is licensed under the GPLv3, like InfiniTime. See [LICENSE](LICENSE).
 
-- [How to contribute](CONTRIBUTING.md)
-- [Coding conventions](doc/coding-convention.md)
+- [Inter](https://rsms.me/inter/) typeface, SIL Open Font License ([Inter-LICENSE.txt](src/displayapp/fonts/Inter-LICENSE.txt))
+- [Font Awesome](https://fontawesome.com/) icons, SIL Open Font License
+- [Material Icons](https://fonts.google.com/icons), Apache License 2.0
 
-### Build, flash and debug
-
-- [InfiniTime simulator](https://github.com/InfiniTimeOrg/InfiniSim)
-- [Build the project](doc/buildAndProgram.md)
-- [Build the project with Docker](doc/buildWithDocker.md)
-- [Build the project with VSCode](doc/buildWithVScode.md)
-- [Flash the firmware using OpenOCD and STLinkV2](doc/openOCD.md)
-- [Flash the firmware using SWD interface](doc/SWD.md)
-- [Flash the firmware using JLink](doc/jlink.md)
-- [Flash the firmware using GDB](doc/gdb.md)
-- [Stub using NRF52-DK](doc/PinetimeStubWithNrf52DK.md)
-
-### API
-
-- [BLE implementation and API](doc/ble.md)
-
-### Architecture and technical topics
-
-- [Memory analysis](doc/MemoryAnalysis.md)
-
-### Project management
-
-- [Maintainer's guide](doc/maintainer-guide.md)
-- [Versioning](doc/versioning.md)
-- [Project branches](doc/branches.md)
-- [Files included in the release notes](doc/filesInReleaseNotes.md)
-- [Files needed by the factory](doc/files-needed-by-factory.md)
-
-## Licenses
-
-This project is released under the GNU General Public License version 3 or, at your option, any later version.
-
-It integrates the following projects:
-
-- RTOS: **[FreeRTOS](https://freertos.org)** under the MIT license
-- UI: **[LittleVGL/LVGL](https://lvgl.io/)** under the MIT license
-- BLE stack: **[NimBLE](https://github.com/apache/mynewt-nimble)** under the Apache 2.0 license
-- Font: **[Jetbrains Mono](https://www.jetbrains.com/fr-fr/lp/mono/)** under the Apache 2.0 license
-
-## Credits
-
-I’m not working alone on this project. First, many people create pull requests for this project. Then, there is the whole #pinetime community: a lot of people all around the world who are hacking, searching, experimenting and programming the Pinetime. We exchange our ideas, experiments and code in the chat rooms and forums.
-
-Here are some people I would like to highlight:
-
-- [Atc1441](https://github.com/atc1441/): He works on an Arduino based firmware for the Pinetime and many other smartwatches based on similar hardware. He was of great help when I was implementing support for the BMA421 motion sensor and I²C driver.
-- [Koen](https://github.com/bosmoment): He’s working on a firmware based on RiotOS. He integrated similar libs as me: NimBLE, LittleVGL,… His help was invaluable too!
-- [Lup Yuen Lee](https://github.com/lupyuen): He is everywhere: he works on a Rust firmware, builds a MCUBoot based bootloader for the Pinetime, designs a Flutter based companion app for smartphones and writes a lot of articles about the Pinetime!
+Apple, Apple Watch and watchOS are trademarks of Apple Inc. PineGlass is not affiliated with, endorsed by, or sponsored by Apple. It contains no Apple code, fonts, icons or artwork.

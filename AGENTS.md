@@ -37,8 +37,8 @@ a pill-button Control Center, notification cards, and a Modular watch face.
 
 ## Building and checking
 
-- Firmware: the `infinitime/infinitime-build` container (`docker/build.sh`),
-  on an x86 or a large ARM machine. Never on a Raspberry Pi.
+- Firmware: the `infinitime/infinitime-build` container (`docker/build.sh`).
+  The `latest` image matches upstream `main` (GCC 15).
 - UI checks: InfiniSim built against this tree, with screenshots of every
   changed screen.
 - Run `clang-format` on changed files before committing.
