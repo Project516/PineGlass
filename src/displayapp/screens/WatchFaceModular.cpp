@@ -209,7 +209,8 @@ void WatchFaceModular::Refresh() {
   }
 
   currentWeather = weatherService.Current();
-  if (currentWeather.IsUpdated()) {
+  isNight = weatherService.IsNight();
+  if (currentWeather.IsUpdated() | isNight.IsUpdated()) {
     UpdateWeather();
   }
 

@@ -32,7 +32,7 @@ Inside an app, press the button to go back. Hold the button to return to the wat
 
 ## Install
 
-1. Download `pinetime-mcuboot-app-dfu-*.zip` from the [releases](https://github.com/Project516/PineGlass/releases).
+1. Download `pineglass-*-dfu.zip` from the [releases](https://github.com/Project516/PineGlass/releases).
 2. Flash it with a companion app: [InfiniLink](https://github.com/InfiniTimeOrg/InfiniLink) on iOS, [Gadgetbridge](https://gadgetbridge.org/) on Android, or [ITD](https://gitea.elara.ws/Elara6331/itd) or [Siglo](https://github.com/alexr4535/siglo) on Linux.
 3. After the watch restarts, open Settings > Firmware and tap Validate. If you do not validate it, the watch goes back to the previous firmware on the next restart.
 

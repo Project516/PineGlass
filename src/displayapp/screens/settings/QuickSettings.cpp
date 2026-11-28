@@ -236,7 +236,7 @@ void QuickSettings::OnButtonEvent(lv_obj_t* object) {
       }
       // Do Not Disturb and Sleep share one setting, so refresh both.
       for (uint8_t i = 0; i < controlsPerPage; i++) {
-        if (buttons[i] != nullptr) {
+        if (buttons[i] != nullptr && controls[page * controlsPerPage + i] != Control::Battery) {
           UpdateControl(i);
         }
       }
