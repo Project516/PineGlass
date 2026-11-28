@@ -20,7 +20,7 @@ namespace Pinetime {
           bool enabled;
         };
 
-        static constexpr uint8_t appsPerScreen = 14;
+        static constexpr uint8_t appsPerScreen = 8;
 
         Tile(uint8_t screenID,
              uint8_t numScreens,

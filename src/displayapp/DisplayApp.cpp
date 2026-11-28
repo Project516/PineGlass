@@ -555,11 +555,17 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
 
   switch (app) {
     case Apps::Launcher: {
+      // Settings takes the last slot of the first page.
+      constexpr size_t settingsIndex = std::min<size_t>(Screens::Tile::appsPerScreen - 1, UserAppTypes::Count);
       std::array<Screens::Tile::Applications, UserAppTypes::Count + 1> apps;
-      apps[0] = {Screens::Symbols::settings, Apps::Settings, true};
-      std::ranges::transform(userApps, apps.begin() + 1, [this](const auto& userApp) {
-        return Screens::Tile::Applications {userApp.icon, userApp.app, userApp.isAvailable(controllers.filesystem)};
-      });
+      for (size_t i = 0, next = 0; i < apps.size(); i++) {
+        if (i == settingsIndex) {
+          apps[i] = {Screens::Symbols::settings, Apps::Settings, true};
+        } else {
+          const auto& userApp = userApps[next++];
+          apps[i] = {userApp.icon, userApp.app, userApp.isAvailable(controllers.filesystem)};
+        }
+      }
       currentScreen = std::make_unique<Screens::ApplicationList>(this,
                                                                  settingsController,
                                                                  batteryController,

@@ -13,7 +13,7 @@ PineGlass is firmware for the [PineTime](https://pine64.org/devices/pinetime/) s
 ## What is different from InfiniTime
 
 - **Modular watch face.** Date and time at the top, a large weather module, and round complications for steps, heart rate and battery. Tap a complication to open its app. Modular is the default face, and every InfiniTime face is still available.
-- **Honeycomb app grid.** Apps are colored circles in staggered rows. Icons near the center are larger and shrink toward the edges. Settings is in the grid as a gray gear.
+- **Honeycomb app grid.** Apps are large colored circles in staggered rows, eight per page. The first page holds the everyday apps and Settings. Swipe up for the rest.
 - **Control Center.** Two columns of pill buttons: Bluetooth, battery, Do Not Disturb, Sleep, flashlight, brightness, Settings, and Lock Screen.
 - **Notification cards.** Each card shows an app icon in the category color, the sender, and the message on a rounded card.
 - **System look.** Black background, a dark color palette, rounded controls, and the Inter typeface with antialiased text.

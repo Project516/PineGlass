@@ -8,10 +8,6 @@
          {
             "file": "FontAwesome5-Solid+Brands+Regular.woff",
             "range": "0xf294, 0xf242, 0xf54b, 0xf21e, 0xf1e6, 0xf017, 0xf129, 0xf03a, 0xf185, 0xf560, 0xf001, 0xf3fd, 0xf1fc, 0xf45d, 0xf59f, 0xf5a0, 0xf027, 0xf028, 0xf6a9, 0xf04b, 0xf04c, 0xf048, 0xf051, 0xf095, 0xf3dd, 0xf04d, 0xf2f2, 0xf024, 0xf252, 0xf569, 0xf06e, 0xf015, 0xf00c, 0xf0f3, 0xf522, 0xf743, 0xf1ec, 0xf55a, 0xf3ed, 0xf075, 0xf0e0, 0xf133, 0xf1ea, 0xf12a"
-         },
-         {
-            "file": "material-design-icons/MaterialIcons-Regular.ttf",
-            "range": "0xe8b8"
          }
       ],
       "bpp": 4,
@@ -87,7 +83,7 @@
       "bpp": 2,
       "size": 25
    },
-   "app_icons_28": {
+   "app_icons_36": {
       "sources": [
          {
             "file": "Inter-SemiBold.ttf",
@@ -96,9 +92,13 @@
          {
             "file": "FontAwesome5-Solid+Brands+Regular.woff",
             "range": "0xf001, 0xf0f3, 0xf1ec, 0xf1fc, 0xf21e, 0xf252, 0xf2f2, 0xf45d, 0xf522, 0xf54b, 0xf569, 0xf5a0, 0xf743"
+         },
+         {
+            "file": "material-design-icons/MaterialIcons-Regular.ttf",
+            "range": "0xe8b8"
          }
       ],
       "bpp": 4,
-      "size": 28
+      "size": 36
    }
 }
