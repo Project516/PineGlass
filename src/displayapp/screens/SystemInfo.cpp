@@ -80,13 +80,14 @@ std::unique_ptr<Screen> SystemInfo::CreateScreen1() {
   lv_obj_t* label = lv_label_create(lv_scr_act(), nullptr);
   lv_label_set_recolor(label, true);
   lv_label_set_text_fmt(label,
-                        "#FFFF00 InfiniTime#\n\n"
-                        "#808080 Version# %ld.%ld.%ld\n"
-                        "#808080 Short Ref# %s\n"
-                        "#808080 Build date#\n"
+                        "PineGlass\n"
+                        "#8E8E93 based on InfiniTime#\n\n"
+                        "#8E8E93 Version# %ld.%ld.%ld\n"
+                        "#8E8E93 Short Ref# %s\n"
+                        "#8E8E93 Build date#\n"
                         "%s\n"
                         "%s\n\n"
-                        "#808080 Bootloader# %s",
+                        "#8E8E93 Bootloader# %s",
                         Version::Major(),
                         Version::Minor(),
                         Version::Patch(),
@@ -291,10 +292,10 @@ std::unique_ptr<Screen> SystemInfo::CreateScreen5() {
                            "under the terms of\n"
                            "the GNU General\n"
                            "Public License v3\n"
-                           "#808080 Source code#\n"
-                           "#FFFF00 https://github.com/#\n"
-                           "#FFFF00 InfiniTimeOrg/#\n"
-                           "#FFFF00 InfiniTime#");
+                           "#8E8E93 Source code#\n"
+                           "#0A84FF https://github.com/#\n"
+                           "#0A84FF Project516/#\n"
+                           "#0A84FF PineGlass#");
   lv_label_set_align(label, LV_LABEL_ALIGN_CENTER);
   lv_obj_align(label, lv_scr_act(), LV_ALIGN_CENTER, 0, 0);
   return std::make_unique<Screens::Label>(4, 5, label);

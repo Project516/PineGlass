@@ -429,8 +429,11 @@ void DisplayApp::Refresh() {
               case TouchEvents::SwipeDown:
                 LoadNewScreen(Apps::Notifications, DisplayApp::FullRefreshDirections::Down);
                 break;
+              case TouchEvents::SwipeLeft:
+                SwitchWatchFace(1);
+                break;
               case TouchEvents::SwipeRight:
-                LoadNewScreen(Apps::QuickSettings, DisplayApp::FullRefreshDirections::RightAnim);
+                SwitchWatchFace(-1);
                 break;
               case TouchEvents::DoubleTap:
                 PushMessageToSystemTask(System::Messages::GoToSleep);
@@ -448,7 +451,7 @@ void DisplayApp::Refresh() {
       case Messages::ButtonPushed:
         if (!currentScreen->OnButtonPushed()) {
           if (currentApp == Apps::Clock) {
-            PushMessageToSystemTask(System::Messages::GoToSleep);
+            LoadNewScreen(Apps::QuickSettings, DisplayApp::FullRefreshDirections::Up);
           } else {
             LoadPreviousScreen();
           }
@@ -458,8 +461,6 @@ void DisplayApp::Refresh() {
         if (currentApp != Apps::Clock) {
           if (currentApp == Apps::Notifications) {
             LoadNewScreen(Apps::Clock, DisplayApp::FullRefreshDirections::Up);
-          } else if (currentApp == Apps::QuickSettings) {
-            LoadNewScreen(Apps::Clock, DisplayApp::FullRefreshDirections::LeftAnim);
           } else {
             LoadNewScreen(Apps::Clock, DisplayApp::FullRefreshDirections::Down);
           }
@@ -500,6 +501,34 @@ void DisplayApp::Refresh() {
   }
 }
 
+void DisplayApp::SwitchWatchFace(int step) {
+  const int count = userWatchFaces.size();
+  int index = 0;
+  for (int i = 0; i < count; i++) {
+    if (userWatchFaces[i].watchFace == settingsController.GetWatchFace()) {
+      index = i;
+    }
+  }
+  for (int i = 1; i < count; i++) {
+    const auto& next = userWatchFaces[(index + step * i + count) % count];
+    if (next.isAvailable(controllers.filesystem)) {
+      settingsController.SetWatchFace(next.watchFace);
+      settingsController.SaveSettings();
+      LoadScreen(Apps::Clock, step > 0 ? FullRefreshDirections::LeftAnim : FullRefreshDirections::RightAnim);
+      return;
+    }
+  }
+}
+
+bool DisplayApp::IsAppAvailable(Apps app) const {
+  if (app == Apps::BatteryInfo) {
+    return true;
+  }
+  return std::ranges::any_of(userApps, [app](const AppDescription& appDescription) {
+    return appDescription.app == app;
+  });
+}
+
 void DisplayApp::StartApp(Apps app, DisplayApp::FullRefreshDirections direction) {
   nextApp = app;
   nextDirection = direction;
@@ -526,10 +555,17 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
 
   switch (app) {
     case Apps::Launcher: {
-      std::array<Screens::Tile::Applications, UserAppTypes::Count> apps;
-      std::ranges::transform(userApps, apps.begin(), [this](const auto& userApp) {
-        return Screens::Tile::Applications {userApp.icon, userApp.app, userApp.isAvailable(controllers.filesystem)};
-      });
+      // Settings takes the last slot of the first page.
+      constexpr size_t settingsIndex = std::min<size_t>(Screens::Tile::appsPerScreen - 1, UserAppTypes::Count);
+      std::array<Screens::Tile::Applications, UserAppTypes::Count + 1> apps;
+      for (size_t i = 0, next = 0; i < apps.size(); i++) {
+        if (i == settingsIndex) {
+          apps[i] = {Screens::Symbols::settings, Apps::Settings, true};
+        } else {
+          const auto& userApp = userApps[next++];
+          apps[i] = {userApp.icon, userApp.app, userApp.isAvailable(controllers.filesystem)};
+        }
+      }
       currentScreen = std::make_unique<Screens::ApplicationList>(this,
                                                                  settingsController,
                                                                  batteryController,
@@ -584,12 +620,12 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
     case Apps::QuickSettings:
       currentScreen = std::make_unique<Screens::QuickSettings>(this,
                                                                batteryController,
-                                                               dateTimeController,
                                                                brightnessController,
                                                                motorController,
                                                                settingsController,
                                                                bleController,
-                                                               alarmController);
+                                                               alarmController,
+                                                               *systemTask);
       break;
     case Apps::Settings:
       currentScreen = std::make_unique<Screens::Settings>(this, settingsController);

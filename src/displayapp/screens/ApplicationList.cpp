@@ -24,7 +24,7 @@ ApplicationList::ApplicationList(DisplayApp* app,
                                  const Pinetime::Controllers::AlarmController& alarmController,
                                  Controllers::DateTime& dateTimeController,
                                  Pinetime::Controllers::FS& filesystem,
-                                 std::array<Tile::Applications, UserAppTypes::Count>&& apps)
+                                 std::array<Tile::Applications, UserAppTypes::Count + 1>&& apps)
   : app {app},
     settingsController {settingsController},
     batteryController {batteryController},
@@ -55,13 +55,5 @@ std::unique_ptr<Screen> ApplicationList::CreateScreen(unsigned int screenNum) co
     }
   }
 
-  return std::make_unique<Screens::Tile>(screenNum,
-                                         nScreens,
-                                         app,
-                                         settingsController,
-                                         batteryController,
-                                         bleController,
-                                         alarmController,
-                                         dateTimeController,
-                                         pageApps);
+  return std::make_unique<Screens::Tile>(screenNum, nScreens, app, settingsController, pageApps);
 }

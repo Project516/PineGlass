@@ -42,6 +42,11 @@ namespace Pinetime {
         static constexpr const char* sleep = "\xEE\xBD\x84";
         static constexpr const char* calculator = "\xEF\x87\xAC";
         static constexpr const char* backspace = "\xEF\x95\x9A";
+        static constexpr const char* comment = "\xEF\x81\xB5";
+        static constexpr const char* envelope = "\xEF\x83\xA0";
+        static constexpr const char* calendar = "\xEF\x84\xB3";
+        static constexpr const char* newspaper = "\xEF\x87\xAA";
+        static constexpr const char* exclamation = "\xEF\x84\xAA";
 
         // fontawesome_weathericons.c
         // static constexpr const char* sun = "\xEF\x86\x85";
@@ -70,6 +75,13 @@ namespace Pinetime {
 
         static constexpr const char* flashlight = "\xEF\x80\x8B";
         static constexpr const char* paintbrushLg = "\xEE\x90\x8A";
+
+        // material_icons_28.c, also uses flashlight, settings and brightness from above
+        static constexpr const char* bluetoothOn = "\xEE\x86\xA7";
+        static constexpr const char* bluetoothOff = "\xEE\x86\xA9";
+        static constexpr const char* doNotDisturb = "\xEE\x94\x9C";
+        static constexpr const char* bed = "\xEE\xBF\x9F";
+        static constexpr const char* lock = "\xEE\xA2\x97";
       }
     }
   }

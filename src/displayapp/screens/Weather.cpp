@@ -29,7 +29,7 @@ Weather::Weather(Controllers::Settings& settingsController, Controllers::SimpleW
 
   temperature = lv_label_create(lv_scr_act(), nullptr);
   lv_obj_set_style_local_text_color(temperature, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-  lv_obj_set_style_local_text_font(temperature, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &jetbrains_mono_42);
+  lv_obj_set_style_local_text_font(temperature, LV_LABEL_PART_MAIN, LV_STATE_DEFAULT, &inter_medium_42);
   lv_label_set_text(temperature, "---");
   lv_obj_align(temperature, nullptr, LV_ALIGN_CENTER, 0, -30);
   lv_obj_set_auto_realign(temperature, true);
@@ -81,6 +81,11 @@ Weather::Weather(Controllers::Settings& settingsController, Controllers::SimpleW
   // LV_TABLE_PART_CELL6: Hot
   lv_obj_set_style_local_border_color(forecast, LV_TABLE_PART_CELL6, LV_STATE_DEFAULT, LV_COLOR_BLACK);
   lv_obj_set_style_local_text_color(forecast, LV_TABLE_PART_CELL6, LV_STATE_DEFAULT, Colors::deepOrange);
+
+  for (uint8_t part = LV_TABLE_PART_CELL1; part <= LV_TABLE_PART_CELL6; part++) {
+    lv_obj_set_style_local_pad_left(forecast, part, LV_STATE_DEFAULT, 0);
+    lv_obj_set_style_local_pad_right(forecast, part, LV_STATE_DEFAULT, 0);
+  }
 
   lv_obj_align(forecast, nullptr, LV_ALIGN_IN_BOTTOM_LEFT, 0, 0);
 
