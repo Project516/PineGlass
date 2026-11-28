@@ -555,8 +555,9 @@ void DisplayApp::LoadScreen(Apps app, DisplayApp::FullRefreshDirections directio
 
   switch (app) {
     case Apps::Launcher: {
-      std::array<Screens::Tile::Applications, UserAppTypes::Count> apps;
-      std::ranges::transform(userApps, apps.begin(), [this](const auto& userApp) {
+      std::array<Screens::Tile::Applications, UserAppTypes::Count + 1> apps;
+      apps[0] = {Screens::Symbols::settings, Apps::Settings, true};
+      std::ranges::transform(userApps, apps.begin() + 1, [this](const auto& userApp) {
         return Screens::Tile::Applications {userApp.icon, userApp.app, userApp.isAvailable(controllers.filesystem)};
       });
       currentScreen = std::make_unique<Screens::ApplicationList>(this,

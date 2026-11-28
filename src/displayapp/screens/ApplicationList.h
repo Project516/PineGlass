@@ -21,7 +21,7 @@ namespace Pinetime {
                                  const Pinetime::Controllers::AlarmController& alarmController,
                                  Controllers::DateTime& dateTimeController,
                                  Pinetime::Controllers::FS& filesystem,
-                                 std::array<Tile::Applications, UserAppTypes::Count>&& apps);
+                                 std::array<Tile::Applications, UserAppTypes::Count + 1>&& apps);
         ~ApplicationList() override;
         bool OnTouchEvent(TouchEvents event) override;
 
@@ -36,11 +36,11 @@ namespace Pinetime {
         const Pinetime::Controllers::AlarmController& alarmController;
         Controllers::DateTime& dateTimeController;
         Pinetime::Controllers::FS& filesystem;
-        std::array<Tile::Applications, UserAppTypes::Count> apps;
+        std::array<Tile::Applications, UserAppTypes::Count + 1> apps;
 
         static constexpr int appsPerScreen = Tile::appsPerScreen;
 
-        static constexpr int nScreens = UserAppTypes::Count > 0 ? (UserAppTypes::Count - 1) / appsPerScreen + 1 : 1;
+        static constexpr int nScreens = UserAppTypes::Count / appsPerScreen + 1;
 
         ScreenList<nScreens> screens;
       };

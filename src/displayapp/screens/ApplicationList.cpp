@@ -24,7 +24,7 @@ ApplicationList::ApplicationList(DisplayApp* app,
                                  const Pinetime::Controllers::AlarmController& alarmController,
                                  Controllers::DateTime& dateTimeController,
                                  Pinetime::Controllers::FS& filesystem,
-                                 std::array<Tile::Applications, UserAppTypes::Count>&& apps)
+                                 std::array<Tile::Applications, UserAppTypes::Count + 1>&& apps)
   : app {app},
     settingsController {settingsController},
     batteryController {batteryController},
